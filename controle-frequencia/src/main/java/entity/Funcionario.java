@@ -11,20 +11,20 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "funcionario")
-public class Funcionario implements Serializable {
+public class Funcionario extends BaseEntity implements Serializable{
 
 	private static final long serialVersionUID = 7309109087193111409L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private int id;
+	public int id;
 
 	@Column(name = "nome")
-	private String nome;
+	public String nome;
 
 	@Column(name = "senha")
-	private String senha;
+	public String senha;
 
 	public int getId() {
 		return id;

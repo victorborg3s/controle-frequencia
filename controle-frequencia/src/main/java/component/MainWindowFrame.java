@@ -17,6 +17,7 @@ public class MainWindowFrame extends JFrame {
 	public MainWindowFrame() throws Exception {
 		super("Controle de Frequencia");
 		self = this;
+		
 		this.setSize(800, 600);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
