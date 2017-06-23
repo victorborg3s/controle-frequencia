@@ -2,12 +2,15 @@ package component.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import component.BasicCRUD;
 import entity.Funcionario;
+import entity.Registro;
+import entity.RegistroTipo;
 
 public class AdministracaoMenu extends JMenu {
 
@@ -23,10 +26,23 @@ public class AdministracaoMenu extends JMenu {
 		crudFuncionario.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String[] fieldsTitle = {"Código", "Nome", "Senha"};
-				String[] fieldsName = {"id", "nome", "senha"};
+				String[] fieldsTitle = {"Código", "Nome", "Senha", "Ativo"};
+				String[] fieldsName = {"id", "nome", "senha", "ativo"};
+				Class<?>[] fieldsType = {Integer.class, String.class, String.class, Boolean.class};
 				BasicCRUD telaFuncionario = new BasicCRUD("Cadastro de Funcionários", 
-						Funcionario.class, fieldsTitle, fieldsName);
+						Funcionario.class, fieldsTitle, fieldsName, fieldsType);
+				telaFuncionario.setVisible(true);
+			}
+		});
+		
+		admAjusteRegistro.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String[] fieldsTitle = {"Funcionário", "Tipo", "Momento"};
+				String[] fieldsName = {"funcionario", "tipo", "momento"};
+				Class<?>[] fieldsType = {Funcionario.class, RegistroTipo.class, Date.class};
+				BasicCRUD telaFuncionario = new BasicCRUD("Registros de Ponto", 
+						Registro.class, fieldsTitle, fieldsName, fieldsType);
 				telaFuncionario.setVisible(true);
 			}
 		});

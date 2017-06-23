@@ -19,6 +19,7 @@
         <property name="current_session_context_class">thread</property>
 
 		<mapping class="entity.Funcionario" />
+		<mapping class="entity.Registro" />
 
     </session-factory>
 </hibernate-configuration>

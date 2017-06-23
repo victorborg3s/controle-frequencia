@@ -18,15 +18,18 @@ public class Funcionario extends BaseEntity implements Serializable{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	public int id;
+	private Integer id;
 
 	@Column(name = "nome")
-	public String nome;
+	private String nome;
 
 	@Column(name = "senha")
-	public String senha;
+	private String senha;
 
-	public int getId() {
+	@Column(name = "ativo")
+	private Boolean ativo;
+
+	public Integer getId() {
 		return id;
 	}
 
@@ -48,6 +51,19 @@ public class Funcionario extends BaseEntity implements Serializable{
 
 	public void setSenha(String senha) {
 		this.senha = senha;
+	}
+
+	public Boolean getAtivo() {
+		return ativo;
+	}
+
+	public void setAtivo(Boolean ativo) {
+		this.ativo = ativo;
+	}
+	
+	@Override
+	public String toString() {
+		return this.nome;
 	}
 	
 }
