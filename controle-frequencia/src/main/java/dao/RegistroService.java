@@ -50,15 +50,15 @@ public class RegistroService {
 			reg = new Registro();
 			reg.setFuncionario(funcionario);
 			reg.setTipo(RegistroTipo.ENTRADA);
-			reg.setMomento(Calendar.getInstance().getTime());
+			Calendar c = Calendar.getInstance();
+			c.add(Calendar.HOUR, -8);
+			reg.setMomento(c.getTime());
 			session.save(reg);
 
 			reg = new Registro();
 			reg.setFuncionario(funcionario);
 			reg.setTipo(RegistroTipo.SAIDA);
-			Calendar c = Calendar.getInstance();
-			c.add(Calendar.HOUR, 8);
-			reg.setMomento(c.getTime());
+			reg.setMomento(Calendar.getInstance().getTime());
 			session.save(reg);
 		}
 		tr.commit();

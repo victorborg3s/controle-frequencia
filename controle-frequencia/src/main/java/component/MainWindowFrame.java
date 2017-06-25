@@ -21,7 +21,7 @@ public class MainWindowFrame extends JFrame {
 		this.setSize(800, 600);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		this.setJMenuBar(new MainMenuBar());
+		this.setJMenuBar(new MainMenuBar(this));
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 			    System.out.println("MainWindowFrame closing event received");

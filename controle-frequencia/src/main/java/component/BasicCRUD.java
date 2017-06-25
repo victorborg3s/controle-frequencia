@@ -1,34 +1,40 @@
 package component;
 
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultComboBoxModel;
+import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
 import dao.GenericService;
 import entity.BaseEntity;
-import entity.RegistroTipo;
 import net.miginfocom.swing.MigLayout;
 
-public class BasicCRUD extends JFrame {
+public class BasicCRUD extends JDialog {
 
 	private static final long serialVersionUID = 8032774481074295385L;
 	private JPanel contentPanel;
@@ -55,8 +61,9 @@ public class BasicCRUD extends JFrame {
 	 * @param fieldsName
 	 *            - the fields that will be recovered from entity
 	 */
-	public BasicCRUD(String title, Class<?> clazz, String[] fieldsTitle, String[] fieldsName, Class<?>[] fieldsType) {
-		super(title);
+	public BasicCRUD(JFrame frame, String title, Class<?> clazz, String[] fieldsTitle, String[] fieldsName,
+			Class<?>[] fieldsType) {
+		super(frame, title, Dialog.ModalityType.DOCUMENT_MODAL);
 
 		this.fieldsName = fieldsName;
 		this.fieldsTitle = fieldsTitle;
@@ -85,7 +92,7 @@ public class BasicCRUD extends JFrame {
 
 	private void initDataGrid(Class<?> clazz) {
 		this.data = GenericService.getAll(clazz);
-		dataGrid = new JTable(new DefaultTableModel(fieldsTitle, data.size())) {
+		dataGrid = new JTable(new AbstractTableModel() {
 
 			private static final long serialVersionUID = -1071314488385082837L;
 
@@ -94,7 +101,53 @@ public class BasicCRUD extends JFrame {
 				return fieldsType[column];
 			}
 
-		};
+			@Override
+			public boolean isCellEditable(int row, int col) {
+				return true;
+			}
+
+			@Override
+			public void setValueAt(Object value, int row, int col) {
+				try {
+					PropertyUtils.setProperty(data.get(row), fieldsName[col], value);
+					this.fireTableCellUpdated(row, col);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public Object getValueAt(int rowIndex, int columnIndex) {
+				Object value = null;
+				try {
+					value = PropertyUtils.getProperty(data.get(rowIndex), fieldsName[columnIndex]);
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return value;
+			}
+
+			@Override
+			public int getRowCount() {
+				return data.size();
+			}
+
+			@Override
+			public int getColumnCount() {
+				return fieldsName.length;
+			}
+		});
 
 		setUpDropDownColumns(this.dataGrid);
 
@@ -126,10 +179,12 @@ public class BasicCRUD extends JFrame {
 	private class DropDownItem {
 		private Integer id;
 		private String description;
+		private Class<?> clazz;
 
-		public DropDownItem(Integer id, String description) {
+		public DropDownItem(Integer id, String description, Class<?> clazz) {
 			this.id = id;
 			this.description = description;
+			this.clazz = clazz;
 		}
 
 		public int getId() {
@@ -143,45 +198,125 @@ public class BasicCRUD extends JFrame {
 		public String toString() {
 			return description;
 		}
-	}
 
-	private class DropDownItemRenderer extends BasicComboBoxRenderer {
-
-		private static final long serialVersionUID = -9152106777678754656L;
-
-		public Component getListCellRendererComponent(@SuppressWarnings("rawtypes") JList list, Object value, int index,
-				boolean isSelected, boolean cellHasFocus) {
-			
-			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-			if (value != null) {
-				DropDownItem item = (DropDownItem) value;
-				setText(item.getDescription().toUpperCase());
-			}
-
-			if (index == -1) {
-				DropDownItem item = (DropDownItem) value;
-				setText("" + item.getId());
-			}
-
-			return this;
+		public Class<?> getClazz() {
+			return clazz;
 		}
+
 	}
 
-	private class ComboBoxTableCellRenderer extends JComboBox<Object> implements TableCellRenderer {
+	private class ComboBoxItemTableCellEditor extends AbstractCellEditor implements TableCellEditor {
 
-		private static final long serialVersionUID = -7733935933066447474L;
+		private static final long serialVersionUID = 6754885924734535914L;
+		private boolean cellEditingStopped = false;
+		private JComboBox<DropDownItem> jComboBox = null;
+
+
+		public ComboBoxItemTableCellEditor(JComboBox<DropDownItem> comboBox) {
+			super();
+			this.jComboBox = comboBox;
+			jComboBox.addItemListener(new ItemListener() {
+				@Override
+				@SuppressWarnings("unchecked")
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED) {
+						if (!cellEditingStopped) {
+							JComboBox<DropDownItem> jcb = (JComboBox<DropDownItem>)e.getSource();
+							Object selectedValue = null;
+							DropDownItem ddi = (DropDownItem) jcb.getSelectedItem();
+							if (ddi.getClazz().isEnum()) {
+								selectedValue = ddi.getClazz().getEnumConstants()[ddi.getId()];
+							} else if (ddi.getClazz().isAssignableFrom(BaseEntity.class)) {
+								selectedValue = GenericService.load(ddi.getClazz(), new Integer(ddi.getId()));
+							}
+							dataGrid.getModel().setValueAt(selectedValue, dataGrid.getSelectedRow(), dataGrid.getSelectedColumn());
+						}
+						fireEditingStopped();
+					}
+				}
+			});
+			jComboBox.addPopupMenuListener(new PopupMenuListener() {
+				@Override
+				public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+					cellEditingStopped = false;
+				}
+
+				@Override
+				public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+					cellEditingStopped = true;
+					fireEditingCanceled();
+				}
+
+				@Override
+				public void popupMenuCanceled(PopupMenuEvent e) {
+
+				}
+			});
+		}
 
 		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			setSelectedItem(value);
-			return this;
+		public Object getCellEditorValue() {
+			return jComboBox.getSelectedItem();
+		}
+
+		@Override
+		public boolean isCellEditable(EventObject anEvent) {
+			return true;
+		}
+
+		@Override
+		public boolean shouldSelectCell(EventObject anEvent) {
+			return true;
+		}
+
+		@Override
+		public boolean stopCellEditing() {
+			return cellEditingStopped;
+		}
+
+		@Override
+		public void cancelCellEditing() {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void addCellEditorListener(CellEditorListener l) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public void removeCellEditorListener(CellEditorListener l) {
+			// TODO Auto-generated method stub
+
+		}
+
+		@Override
+		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+				int column) {
+			DropDownItem auxDDI, selectedDDI = null;
+
+			for (int i = 0; i < jComboBox.getModel().getSize(); i++) {
+				auxDDI = jComboBox.getModel().getElementAt(i);
+				if (value.getClass().isEnum()) {
+					if (auxDDI.getDescription().equals(value.toString())) {
+						selectedDDI = auxDDI;
+					}
+				} else if (value.getClass().isAssignableFrom(BaseEntity.class)) {
+					if (auxDDI.getId() == ((BaseEntity) value).getId().intValue()) {
+						selectedDDI = auxDDI;
+					}
+				}
+			}
+
+			jComboBox.setSelectedItem(selectedDDI);
+			
+			return jComboBox;
 		}
 
 	}
-	
-	@SuppressWarnings("unchecked")
+
 	private void setUpDropDownColumns(JTable table) {
 		TableColumn tableColumn = null;
 
@@ -189,53 +324,42 @@ public class BasicCRUD extends JFrame {
 			if (this.fieldsType[i].isAssignableFrom(BaseEntity.class)) {
 				tableColumn = table.getColumnModel().getColumn(i);
 				List<?> innerData = GenericService.getAll(this.fieldsType[i]);
-				JComboBox<?> comboBox = null;
-				ComboBoxModel<DropDownItem> model1 = new DefaultComboBoxModel<DropDownItem>();
-				ComboBoxModel<Object> model2 = new DefaultComboBoxModel<Object>();
+				JComboBox<DropDownItem> comboBox = new JComboBox<DropDownItem>();
 
 				for (Object object : innerData) {
-					((DefaultComboBoxModel<DropDownItem>) model1).addElement(new DropDownItem((Integer)getDataValue(object, "id"), object.toString()));
-					((DefaultComboBoxModel<Object>) model2).addElement(new DropDownItem((Integer)getDataValue(object, "id"), object.toString()));
+					comboBox.addItem(new DropDownItem((Integer) getDataValue(object, "id"), object.toString(), this.fieldsType[i]));
 				}
 
-				comboBox = new JComboBox<>(model1);
-				comboBox.setRenderer(new DropDownItemRenderer());
-				tableColumn.setCellEditor(new DefaultCellEditor(comboBox));
-				
-				ComboBoxTableCellRenderer renderer = new ComboBoxTableCellRenderer();
-				renderer.setModel(model2);
-				tableColumn.setCellRenderer(renderer);
-				
-//		        getContentPane().add(comboBox, BorderLayout.SOUTH );
-
-				tableColumn.setCellEditor(new DefaultCellEditor(comboBox));
+				tableColumn.setCellEditor(new ComboBoxItemTableCellEditor(comboBox));
+				tableColumn.setCellRenderer(new DefaultTableCellRenderer());
 			} else if (this.fieldsType[i].isEnum()) {
 				tableColumn = table.getColumnModel().getColumn(i);
-				JComboBox<?> comboBox = null;
-				ComboBoxModel<String> model1 = new DefaultComboBoxModel<String>();
-				ComboBoxModel<Object> model2 = new DefaultComboBoxModel<Object>();
+				JComboBox<DropDownItem> comboBox = new JComboBox<DropDownItem>();
 
-				//TODO Ajeitar para ser por reflexão. Nem sempre vai ser RegistroTipo.
-				for (int j = 0; j < RegistroTipo.values().length; j++) {
-					((DefaultComboBoxModel<String>)model1).addElement(RegistroTipo.values()[j].toString());
-					((DefaultComboBoxModel<Object>) model2).addElement(RegistroTipo.values()[j].toString());
+				for (int j = 0; j < this.fieldsType[i].getEnumConstants().length; j++) {
+					comboBox.addItem(
+							new DropDownItem(j, this.fieldsType[i].getEnumConstants()[j].toString(), this.fieldsType[i]));
 				}
-				
-				comboBox = new JComboBox<>(model1);
-				tableColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
-				ComboBoxTableCellRenderer renderer = new ComboBoxTableCellRenderer();
-				renderer.setModel(model2);
-				tableColumn.setCellRenderer(renderer);
-				
-		        comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
-//		        getContentPane().add(comboBox, BorderLayout.NORTH );
+				tableColumn.setCellEditor(new ComboBoxItemTableCellEditor(comboBox));
+				tableColumn.setCellRenderer(new DefaultTableCellRenderer());
+			} else if (this.fieldsType[i].isAssignableFrom(Date.class)) {
+				table.getColumnModel().getColumn(i).setCellRenderer(new DefaultTableCellRenderer() {
 
-				tableColumn.setCellEditor(new DefaultCellEditor(comboBox));
+					private static final long serialVersionUID = -5640539892438805072L;
+					SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+					public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+							boolean hasFocus, int row, int column) {
+						if (value instanceof Date) {
+							value = f.format(value);
+						}
+						return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+					}
+				});
 			}
 		}
 
-		
 	}
 
 	public List<?> getData() {
