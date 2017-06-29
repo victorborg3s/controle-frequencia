@@ -3,6 +3,8 @@ package component;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +22,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.CellEditorListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.AbstractTableModel;
@@ -37,12 +42,16 @@ import net.miginfocom.swing.MigLayout;
 public class BasicCRUD extends JDialog {
 
 	private static final long serialVersionUID = 8032774481074295385L;
+	private static final int ROW_EDITING_NONE = -11;
+
 	private JPanel contentPanel;
 	private List<?> data;
 	private JTable dataGrid;
 	private String[] fieldsTitle;
 	private String[] fieldsName;
 	private Class<?>[] fieldsType;
+	private int currentEditingRow = ROW_EDITING_NONE;
+	private JButton inserir, editar, salvar;
 
 	@SuppressWarnings("unused")
 	private BasicCRUD() {
@@ -69,9 +78,54 @@ public class BasicCRUD extends JDialog {
 		this.fieldsTitle = fieldsTitle;
 		this.fieldsType = fieldsType;
 
+		configureInserirButton();
+		configureEditarButton();
+		configureSalvarButton();
 		initDataGrid(clazz);
 
 		setupDefaultOverallAppearance();
+	}
+
+	private void configureSalvarButton() {
+		this.salvar = new JButton("Salvar");
+		this.salvar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (dataGrid.isEditing()) {
+					dataGrid.getCellEditor().stopCellEditing();
+					currentEditingRow = ROW_EDITING_NONE;
+				}
+			}
+		});
+	}
+
+	private void configureEditarButton() {
+
+		this.editar = new JButton("Editar");
+		this.editar.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (dataGrid.getSelectedRow() > -1) {
+					currentEditingRow = dataGrid.getSelectedRow();
+					dataGrid.setEditingRow(dataGrid.getSelectedRow());
+					for (int i = fieldsName.length - 1; i >= 0; i--) {
+						dataGrid.editCellAt(currentEditingRow, i);
+						dataGrid.getCellEditor(currentEditingRow, i);
+					}
+				}
+			}
+		});
+	}
+
+	private void configureInserirButton() {
+		this.inserir = new JButton("Inseir");
+		this.inserir.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+
 	}
 
 	private void setupDefaultOverallAppearance() {
@@ -83,16 +137,17 @@ public class BasicCRUD extends JDialog {
 
 		contentPanel = new JPanel();
 		contentPanel.setLayout(new MigLayout());
-		contentPanel.add(new JButton("Incluir"));
-		contentPanel.add(new JButton("Alterar"), "wrap");
-		contentPanel.add(scrPane, "span 6");
+		contentPanel.add(inserir);
+		contentPanel.add(editar);
+		contentPanel.add(salvar, "wrap");
+		contentPanel.add(scrPane, "span 5");
 		this.add(contentPanel);
 
 	}
 
 	private void initDataGrid(Class<?> clazz) {
 		this.data = GenericService.getAll(clazz);
-		dataGrid = new JTable(new AbstractTableModel() {
+		this.dataGrid = new JTable(new AbstractTableModel() {
 
 			private static final long serialVersionUID = -1071314488385082837L;
 
@@ -103,7 +158,7 @@ public class BasicCRUD extends JDialog {
 
 			@Override
 			public boolean isCellEditable(int row, int col) {
-				return true;
+				return (row == currentEditingRow);
 			}
 
 			@Override
@@ -149,6 +204,17 @@ public class BasicCRUD extends JDialog {
 			}
 		});
 
+		dataGrid.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		dataGrid.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (currentEditingRow != ROW_EDITING_NONE) {
+					if ((e.getFirstIndex() != currentEditingRow) || (e.getLastIndex() != currentEditingRow)) {
+						dataGrid.getSelectionModel().setSelectionInterval(currentEditingRow, currentEditingRow);
+					}
+				}
+			}
+		});
 		setUpDropDownColumns(this.dataGrid);
 
 		Iterator<?> it = data.iterator();
@@ -211,7 +277,6 @@ public class BasicCRUD extends JDialog {
 		private boolean cellEditingStopped = false;
 		private JComboBox<DropDownItem> jComboBox = null;
 
-
 		public ComboBoxItemTableCellEditor(JComboBox<DropDownItem> comboBox) {
 			super();
 			this.jComboBox = comboBox;
@@ -221,15 +286,16 @@ public class BasicCRUD extends JDialog {
 				public void itemStateChanged(ItemEvent e) {
 					if (e.getStateChange() == ItemEvent.SELECTED) {
 						if (!cellEditingStopped) {
-							JComboBox<DropDownItem> jcb = (JComboBox<DropDownItem>)e.getSource();
+							JComboBox<DropDownItem> jcb = (JComboBox<DropDownItem>) e.getSource();
 							Object selectedValue = null;
 							DropDownItem ddi = (DropDownItem) jcb.getSelectedItem();
 							if (ddi.getClazz().isEnum()) {
 								selectedValue = ddi.getClazz().getEnumConstants()[ddi.getId()];
-							} else if (ddi.getClazz().isAssignableFrom(BaseEntity.class)) {
+							} else if (BaseEntity.class.isAssignableFrom(ddi.getClazz())) {
 								selectedValue = GenericService.load(ddi.getClazz(), new Integer(ddi.getId()));
 							}
-							dataGrid.getModel().setValueAt(selectedValue, dataGrid.getSelectedRow(), dataGrid.getSelectedColumn());
+							dataGrid.getModel().setValueAt(selectedValue, dataGrid.getSelectedRow(),
+									dataGrid.getSelectedColumn());
 						}
 						fireEditingStopped();
 					}
@@ -261,7 +327,12 @@ public class BasicCRUD extends JDialog {
 
 		@Override
 		public boolean isCellEditable(EventObject anEvent) {
-			return true;
+			JTable table = null;
+			if ((anEvent != null) && (anEvent.getSource() != null)
+					&& (JTable.class.isAssignableFrom(anEvent.getSource().getClass()))) {
+				table = (JTable) anEvent.getSource();
+			}
+			return ((table != null) && (table.getSelectedRow() == currentEditingRow));
 		}
 
 		@Override
@@ -271,6 +342,7 @@ public class BasicCRUD extends JDialog {
 
 		@Override
 		public boolean stopCellEditing() {
+			fireEditingStopped();
 			return cellEditingStopped;
 		}
 
@@ -296,22 +368,24 @@ public class BasicCRUD extends JDialog {
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
 				int column) {
 			DropDownItem auxDDI, selectedDDI = null;
-
-			for (int i = 0; i < jComboBox.getModel().getSize(); i++) {
-				auxDDI = jComboBox.getModel().getElementAt(i);
-				if (value.getClass().isEnum()) {
-					if (auxDDI.getDescription().equals(value.toString())) {
-						selectedDDI = auxDDI;
-					}
-				} else if (value.getClass().isAssignableFrom(BaseEntity.class)) {
-					if (auxDDI.getId() == ((BaseEntity) value).getId().intValue()) {
-						selectedDDI = auxDDI;
+			
+			if (jComboBox != null) {
+				for (int i = 0; i < jComboBox.getModel().getSize(); i++) {
+					auxDDI = jComboBox.getModel().getElementAt(i);
+					if (value.getClass().isEnum()) {
+						if (auxDDI.getDescription().equals(value.toString())) {
+							selectedDDI = auxDDI;
+						}
+					} else if (BaseEntity.class.isAssignableFrom(value.getClass())) {
+						if (auxDDI.getId() == ((BaseEntity) value).getId().intValue()) {
+							selectedDDI = auxDDI;
+						}
 					}
 				}
+
+				jComboBox.setSelectedItem(selectedDDI);
 			}
 
-			jComboBox.setSelectedItem(selectedDDI);
-			
 			return jComboBox;
 		}
 
@@ -321,13 +395,14 @@ public class BasicCRUD extends JDialog {
 		TableColumn tableColumn = null;
 
 		for (int i = 0; i < this.fieldsType.length; i++) {
-			if (this.fieldsType[i].isAssignableFrom(BaseEntity.class)) {
+			if (BaseEntity.class.isAssignableFrom(this.fieldsType[i])) {
 				tableColumn = table.getColumnModel().getColumn(i);
 				List<?> innerData = GenericService.getAll(this.fieldsType[i]);
 				JComboBox<DropDownItem> comboBox = new JComboBox<DropDownItem>();
 
 				for (Object object : innerData) {
-					comboBox.addItem(new DropDownItem((Integer) getDataValue(object, "id"), object.toString(), this.fieldsType[i]));
+					comboBox.addItem(new DropDownItem((Integer) getDataValue(object, "id"), object.toString(),
+							this.fieldsType[i]));
 				}
 
 				tableColumn.setCellEditor(new ComboBoxItemTableCellEditor(comboBox));
@@ -337,8 +412,8 @@ public class BasicCRUD extends JDialog {
 				JComboBox<DropDownItem> comboBox = new JComboBox<DropDownItem>();
 
 				for (int j = 0; j < this.fieldsType[i].getEnumConstants().length; j++) {
-					comboBox.addItem(
-							new DropDownItem(j, this.fieldsType[i].getEnumConstants()[j].toString(), this.fieldsType[i]));
+					comboBox.addItem(new DropDownItem(j, this.fieldsType[i].getEnumConstants()[j].toString(),
+							this.fieldsType[i]));
 				}
 
 				tableColumn.setCellEditor(new ComboBoxItemTableCellEditor(comboBox));
