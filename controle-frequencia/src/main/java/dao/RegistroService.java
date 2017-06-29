@@ -37,15 +37,15 @@ public class RegistroService {
 	}
 	
 	public static void addDummyRegistroData() {
+		List<Funcionario> funcionarios = FuncionarioService.getAllFuncionarios();
 		SessionFactory sessFact = HibernateUtils.getSessionFactory();
 		Session session = sessFact.getCurrentSession();
 		Transaction tr = session.getTransaction();
+		Registro reg = null;
+		
 		if (tr == null || !tr.isActive()) {
 			tr = session.beginTransaction();
 		}
-		Registro reg = null;
-		List<Funcionario> funcionarios = FuncionarioService.getAllFuncionarios();
-		
 		for (Funcionario funcionario : funcionarios) {
 			reg = new Registro();
 			reg.setFuncionario(funcionario);

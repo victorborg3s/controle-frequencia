@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.persistence.criteria.CriteriaQuery;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -19,18 +20,35 @@ public class FuncionarioService {
 		
 		SessionFactory sessFact = HibernateUtils.getSessionFactory();
 		Session session = sessFact.getCurrentSession();
-//		Transaction tr = session.getTransaction();
-//		if (tr == null || !tr.isActive()) {
-//			tr = session.beginTransaction();
-//		}
-
+		Transaction tr = session.getTransaction();
+		if (tr == null || !tr.isActive()) {
+			tr = session.beginTransaction();
+		}
+		
 		CriteriaQuery<?> cq = session.getCriteriaBuilder().createQuery(Funcionario.class);
 		cq.from(Funcionario.class);
 		data = (List<Funcionario>) session.createQuery(cq).getResultList();
 
-//		tr.commit();
+		tr.commit();
 		
 		return data;
+	}
+	
+	public static Object[][] getAllFuncionariosAsArray() {
+		List<Funcionario> data = getAllFuncionarios();
+		int fieldQuantity = PropertyUtils.getPropertyDescriptors(Funcionario.class).length;
+		Object[][] arrayData = new Object[data.size()][fieldQuantity];
+
+		int row = 0;
+		for (Funcionario funcionario : data) {
+			arrayData[row][0] = funcionario.getId();
+			arrayData[row][1] = funcionario.getNome();
+			arrayData[row][2] = funcionario.getSenha();
+			arrayData[row][3] = funcionario.getAtivo();
+			row++;
+		}
+		
+		return arrayData;
 	}
 	
 	public static void addDummyFuncionarioData() {

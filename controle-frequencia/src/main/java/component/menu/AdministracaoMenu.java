@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import component.BasicCRUD;
+import component.CadastroFuncionario;
 import entity.Funcionario;
 import entity.Registro;
 import entity.RegistroTipo;
@@ -34,15 +34,8 @@ public class AdministracaoMenu extends JMenu {
 		crudFuncionario.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String[] fieldsTitle = {"Código", "Nome", "Senha", "Ativo"};
-				String[] fieldsName = {"id", "nome", "senha", "ativo"};
-				Class<?>[] fieldsType = {Integer.class, String.class, String.class, Boolean.class};
-				BasicCRUD telaFuncionario = new BasicCRUD(mainFrame, "Cadastro de Funcionários", 
-						Funcionario.class, fieldsTitle, fieldsName, fieldsType);
-//				if (mainFrame != null) {
-//					mainFrame.setEnabled(false);
-//				}
-				telaFuncionario.setVisible(true);
+				CadastroFuncionario dialog = new CadastroFuncionario(mainFrame);
+				dialog.setVisible(true);
 			}
 		});
 		
@@ -52,9 +45,7 @@ public class AdministracaoMenu extends JMenu {
 				String[] fieldsTitle = {"Funcionário", "Tipo", "Data/Hora"};
 				String[] fieldsName = {"funcionario", "tipo", "momento"};
 				Class<?>[] fieldsType = {Funcionario.class, RegistroTipo.class, Date.class};
-				BasicCRUD telaFuncionario = new BasicCRUD(mainFrame, "Registros de Ponto", 
-						Registro.class, fieldsTitle, fieldsName, fieldsType);
-				telaFuncionario.setVisible(true);
+
 			}
 		});
 		
