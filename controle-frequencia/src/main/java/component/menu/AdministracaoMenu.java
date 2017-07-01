@@ -2,16 +2,12 @@ package component.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Date;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import component.CadastroFuncionario;
-import entity.Funcionario;
-import entity.Registro;
-import entity.RegistroTipo;
+import component.ListagemFuncionario;
 
 public class AdministracaoMenu extends JMenu {
 
@@ -34,7 +30,7 @@ public class AdministracaoMenu extends JMenu {
 		crudFuncionario.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				CadastroFuncionario dialog = new CadastroFuncionario(mainFrame);
+				ListagemFuncionario dialog = new ListagemFuncionario(mainFrame);
 				dialog.setVisible(true);
 			}
 		});
@@ -42,9 +38,6 @@ public class AdministracaoMenu extends JMenu {
 		admAjusteRegistro.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String[] fieldsTitle = {"Funcionário", "Tipo", "Data/Hora"};
-				String[] fieldsName = {"funcionario", "tipo", "momento"};
-				Class<?>[] fieldsType = {Funcionario.class, RegistroTipo.class, Date.class};
 
 			}
 		});

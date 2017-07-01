@@ -17,23 +17,23 @@ public class FuncionarioService {
 	@SuppressWarnings("unchecked")
 	public static List<Funcionario> getAllFuncionarios() {
 		List<Funcionario> data;
-		
+
 		SessionFactory sessFact = HibernateUtils.getSessionFactory();
 		Session session = sessFact.getCurrentSession();
 		Transaction tr = session.getTransaction();
 		if (tr == null || !tr.isActive()) {
 			tr = session.beginTransaction();
 		}
-		
+
 		CriteriaQuery<?> cq = session.getCriteriaBuilder().createQuery(Funcionario.class);
 		cq.from(Funcionario.class);
 		data = (List<Funcionario>) session.createQuery(cq).getResultList();
 
 		tr.commit();
-		
+
 		return data;
 	}
-	
+
 	public static Object[][] getAllFuncionariosAsArray() {
 		List<Funcionario> data = getAllFuncionarios();
 		int fieldQuantity = PropertyUtils.getPropertyDescriptors(Funcionario.class).length;
@@ -47,10 +47,10 @@ public class FuncionarioService {
 			arrayData[row][3] = funcionario.getAtivo();
 			row++;
 		}
-		
+
 		return arrayData;
 	}
-	
+
 	public static void addDummyFuncionarioData() {
 		SessionFactory sessFact = HibernateUtils.getSessionFactory();
 		Session session = sessFact.getCurrentSession();
@@ -68,5 +68,48 @@ public class FuncionarioService {
 		}
 		tr.commit();
 	}
-	
+
+	public static Funcionario getFuncionarioById(Integer id) {
+		Funcionario funcionario = null;
+
+		SessionFactory sessFact = HibernateUtils.getSessionFactory();
+		Session session = sessFact.getCurrentSession();
+		Transaction tr = session.getTransaction();
+		if (tr == null || !tr.isActive()) {
+			tr = session.beginTransaction();
+		}
+
+		funcionario = session.get(Funcionario.class, id);
+
+		tr.commit();
+
+		return funcionario;
+	}
+
+	public static void update(Funcionario funcionario) {
+		SessionFactory sessFact = HibernateUtils.getSessionFactory();
+		Session session = sessFact.getCurrentSession();
+		Transaction tr = session.getTransaction();
+		if (tr == null || !tr.isActive()) {
+			tr = session.beginTransaction();
+		}
+
+		session.update(funcionario);
+
+		tr.commit();
+	}
+
+	public static void save(Funcionario funcionario) {
+		SessionFactory sessFact = HibernateUtils.getSessionFactory();
+		Session session = sessFact.getCurrentSession();
+		Transaction tr = session.getTransaction();
+		if (tr == null || !tr.isActive()) {
+			tr = session.beginTransaction();
+		}
+
+		session.save(funcionario);
+
+		tr.commit();
+	}
+
 }
