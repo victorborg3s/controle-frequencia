@@ -34,7 +34,20 @@ public class FuncionarioService {
 		return data;
 	}
 
-	public static Object[][] getAllFuncionariosAsArray() {
+	public static Funcionario[] getAllFuncionariosAsArray() {
+		List<Funcionario> data = getAllFuncionarios();
+		Funcionario[] arrayData = new Funcionario[data.size()];
+
+		int row = 0;
+		for (Funcionario funcionario : data) {
+			arrayData[row] = funcionario;
+			row++;
+		}
+
+		return arrayData;		
+	}
+	
+	public static Object[][] getAllFuncionariosAsArrayOfArray() {
 		List<Funcionario> data = getAllFuncionarios();
 		int fieldQuantity = PropertyUtils.getPropertyDescriptors(Funcionario.class).length;
 		Object[][] arrayData = new Object[data.size()][fieldQuantity];

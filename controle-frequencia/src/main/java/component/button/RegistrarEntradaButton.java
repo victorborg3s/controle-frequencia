@@ -13,12 +13,18 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
+import component.MainWindowFrame;
+import component.registro.RegistroPonto;
+import entity.RegistroTipo;
+
 public class RegistrarEntradaButton extends JButton {
 
 	private static final long serialVersionUID = -4450693869981094587L;
+	private RegistrarEntradaButton self;
 	
 	public RegistrarEntradaButton() throws Exception {
 		super("Entrada");
+		self = this;
 		this.setPreferredSize(new Dimension(330, 130));
 		this.setFont(new Font("Arial", Font.PLAIN, 40));
 		
@@ -40,7 +46,8 @@ public class RegistrarEntradaButton extends JButton {
 	    this.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				//TODO registrar ponto de entrada
+				RegistroPonto telaRegistro = new RegistroPonto((MainWindowFrame)self.getParent().getParent().getParent().getParent(), RegistroTipo.ENTRADA);
+				telaRegistro.setVisible(true);
 			}
 		});
 	    

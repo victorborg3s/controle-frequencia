@@ -7,7 +7,8 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import component.ListagemFuncionario;
+import component.funcionario.ListagemFuncionario;
+import component.registro.ListagemRegistro;
 
 public class AdministracaoMenu extends JMenu {
 
@@ -38,7 +39,8 @@ public class AdministracaoMenu extends JMenu {
 		admAjusteRegistro.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				ListagemRegistro dialog = new ListagemRegistro(mainFrame);
+				dialog.setVisible(true);
 			}
 		});
 		

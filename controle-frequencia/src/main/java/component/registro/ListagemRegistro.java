@@ -1,39 +1,48 @@
-package component;
+package component.registro;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JScrollPane;
 
-import dao.FuncionarioService;
+import entity.Funcionario;
+import entity.RegistroTipo;
 
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+
+import dao.RegistroService;
+
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.ListSelectionModel;
 
-public class ListagemFuncionario extends JDialog {
+public class ListagemRegistro extends JDialog {
 
 	private static final long serialVersionUID = -7936096922182586772L;
 	private final JPanel contentPanel = new JPanel();
-	private ListagemFuncionario self;
-	private JTable funcionarioTable;
+	private ListagemRegistro self;
+	private JTable table;
 
 	/**
 	 * Create the dialog.
 	 */
-	public ListagemFuncionario(JFrame frame) {
-		super(frame, "Cadastro de Funcionário", true);
+	public ListagemRegistro(JFrame frame) {
+		super(frame, "Registros", true);
 		self = this;
 		setResizable(false);
 		setBounds(100, 100, 600, 387);
@@ -47,29 +56,10 @@ public class ListagemFuncionario extends JDialog {
 			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 			contentPanel.add(scrollPane);
 			{
-				funcionarioTable = new JTable(new DefaultTableModel() {
-					private static final long serialVersionUID = 6293777456570174842L;
-					@Override
-					public boolean isCellEditable(int row, int column) {
-						return false;
-					}
-					@Override
-					public void setValueAt(Object aValue, int row, int column) {
-					}
-				});
-				funcionarioTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-				funcionarioTable.setModel(new DefaultTableModel(FuncionarioService.getAllFuncionariosAsArray(),
-						new String[] { "C\u00F3digo", "Nome", "Senha", "Ativo" }) {
-
-					private static final long serialVersionUID = 9083678430887126590L;
-
-					Class<?>[] columnTypes = new Class[] { Integer.class, String.class, String.class, Boolean.class };
-
-					public Class<?> getColumnClass(int columnIndex) {
-						return columnTypes[columnIndex];
-					}
-				});
-				scrollPane.setViewportView(funcionarioTable);
+				table = new JTable(new DefaultTableModel());
+				table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+				refreshData();
+				scrollPane.setViewportView(table);
 			}
 		}
 		{
@@ -80,7 +70,7 @@ public class ListagemFuncionario extends JDialog {
 				JButton newButton = new JButton("Novo");
 				newButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						carregarCadastroFuncionario(null);
+						carregarCadastro(null);
 					}
 				});
 				buttonPane.add(newButton);
@@ -89,9 +79,8 @@ public class ListagemFuncionario extends JDialog {
 				JButton editButton = new JButton("Editar");
 				editButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						if (funcionarioTable.getSelectedRow() != -1) {
-							carregarCadastroFuncionario(
-									funcionarioTable.getModel().getValueAt(funcionarioTable.getSelectedRow(), 0));
+						if (table.getSelectedRow() != -1) {
+							carregarCadastro(table.getModel().getValueAt(table.getSelectedRow(), 0));
 						} else {
 							JOptionPane.showMessageDialog(contentPanel,
 									"É necessário escolher uma linha da listagem para editar.");
@@ -113,59 +102,69 @@ public class ListagemFuncionario extends JDialog {
 		}
 	}
 
-	protected void carregarCadastroFuncionario(Object value) {
-		CadastroFuncionario cadFuncionario = new CadastroFuncionario(this, (Integer)value);
-		cadFuncionario.addWindowListener(new WindowListener() {
+	protected void carregarCadastro(Object value) {
+		CadastroRegistro cadastro = new CadastroRegistro(this, (Integer) value);
+		cadastro.addWindowListener(new WindowListener() {
 			@Override
 			public void windowOpened(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
+
 			@Override
 			public void windowIconified(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
+
 			@Override
 			public void windowDeiconified(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
+
 			@Override
 			public void windowDeactivated(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
+
 			@Override
 			public void windowClosing(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
+
 			@Override
 			public void windowClosed(WindowEvent e) {
 				refreshData();
 			}
+
 			@Override
 			public void windowActivated(WindowEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 		});
-		cadFuncionario.setVisible(true);
+		cadastro.setVisible(true);
 	}
 
 	protected void refreshData() {
-		funcionarioTable.setModel(new DefaultTableModel(FuncionarioService.getAllFuncionariosAsArray(),
-				new String[] { "C\u00F3digo", "Nome", "Senha", "Ativo" }) {
+		table.setModel(new DefaultTableModel(RegistroService.getAllRegistrosAsArray(),
+				new String[] { "C\u00F3digo", "Funcionario", "Tipo", "Momento" }) {
 
-			private static final long serialVersionUID = 9083678430887126590L;
-
-			Class<?>[] columnTypes = new Class[] { Integer.class, String.class, String.class, Boolean.class };
+			private static final long serialVersionUID = 8353999914011601804L;
+			Class<?>[] columnTypes = new Class[] { Integer.class, Funcionario.class, RegistroTipo.class, Date.class };
 
 			public Class<?> getColumnClass(int columnIndex) {
 				return columnTypes[columnIndex];
 			}
+
+			boolean[] columnEditables = new boolean[] { false, false, false, false };
+
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
 		});
+		table.getColumnModel().getColumn(3).setCellRenderer(new TableCellRenderer() {
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+					boolean hasFocus, int row, int column) {
+				JLabel label = new JLabel();
+				SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+				label.setText(dateFormat.format((Date) value));
+				return label;
+			}
+		});
+		table.getColumnModel().getColumn(0).setPreferredWidth(50);
 	}
 
 }

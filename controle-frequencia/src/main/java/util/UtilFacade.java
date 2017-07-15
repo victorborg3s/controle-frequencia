@@ -1,8 +1,5 @@
 package util;
 
-import dao.FuncionarioService;
-import dao.RegistroService;
-
 public class UtilFacade {
 
 	private UtilFacade() {
@@ -19,9 +16,8 @@ public class UtilFacade {
 		
 
 		// Código abaixo necessário apenas para teste
-		// TODO remover linha abaixo
-		FuncionarioService.addDummyFuncionarioData();
-		RegistroService.addDummyRegistroData();
+//		FuncionarioService.addDummyFuncionarioData();
+//		RegistroService.addDummyRegistroData();
 	}
 	
 }
