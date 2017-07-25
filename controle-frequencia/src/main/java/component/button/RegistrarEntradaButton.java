@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -31,8 +30,7 @@ public class RegistrarEntradaButton extends JButton {
 		BufferedImage originalImage;
 		BufferedImage resizedImage;
 		try {
-			URL url = getClass().getResource("/img/entrada.png");
-			originalImage = ImageIO.read(url);
+			originalImage = ImageIO.read(getClass().getClassLoader().getResourceAsStream("entrada.png"));
 			int type = originalImage.getType() == 0? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
 			resizedImage = new BufferedImage(64, 64, type);
 			Graphics2D g = resizedImage.createGraphics();

@@ -6,6 +6,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import component.listeners.MenuToggleListener;
 import component.menu.MainMenuBar;
 import util.UtilFacade;
 
@@ -22,6 +23,8 @@ public class MainWindowFrame extends JFrame {
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.setJMenuBar(new MainMenuBar(this));
+		this.getJMenuBar().setVisible(false);
+		this.addKeyListener(new MenuToggleListener(this));
 		this.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 			    System.out.println("MainWindowFrame closing event received");
@@ -35,7 +38,7 @@ public class MainWindowFrame extends JFrame {
 		});
 		
 		try {
-			this.setContentPane(new MainPanel());
+			this.setContentPane(new MainPanel(this));
 		} catch (Exception e) {
 			throw new Exception("Erro ao tentar adicionar painel principal à interface.", e);
 		}

@@ -9,16 +9,10 @@ public class HibernateUtils {
 
 	static {
 		try {
-			sessionFactory = new Configuration().configure().buildSessionFactory();;
-			
-			
-//			StandardServiceRegistry standardRegistry = new StandardServiceRegistryBuilder()
-//					.configure("hibernate.cfg.xml").build();
-//			Metadata metaData = new MetadataSources(standardRegistry).getMetadataBuilder().build();
-//			sessionFactory = metaData.getSessionFactoryBuilder().build();
+			sessionFactory = new Configuration().configure().buildSessionFactory();
 		} catch (Throwable th) {
 
-			System.err.println("Initial SessionFactory creation failed" + th);
+			System.err.println("Initial SessionFactory creation failed " + th);
 			throw new ExceptionInInitializerError(th);
 
 		}
