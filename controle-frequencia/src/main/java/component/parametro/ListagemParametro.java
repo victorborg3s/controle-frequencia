@@ -1,48 +1,42 @@
-package component.registro;
+package component.parametro;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JScrollPane;
 
-import entity.Funcionario;
-import entity.RegistroTipo;
+import entity.ParametroChave;
 
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 
-import dao.RegistroService;
+import dao.ParametroService;
 
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.awt.event.ActionEvent;
 import javax.swing.ListSelectionModel;
 
-public class ListagemRegistro extends JDialog {
+public class ListagemParametro extends JDialog {
 
 	private static final long serialVersionUID = -7936096922182586772L;
 	private final JPanel contentPanel = new JPanel();
-	private ListagemRegistro self;
+	private ListagemParametro self;
 	private JTable table;
 
 	/**
 	 * Create the dialog.
 	 */
-	public ListagemRegistro(JFrame frame) {
-		super(frame, "Registros", true);
+	public ListagemParametro(JFrame frame) {
+		super(frame, "Parâmetros", true);
 		self = this;
 		setResizable(false);
 		setBounds(100, 100, 600, 387);
@@ -103,7 +97,7 @@ public class ListagemRegistro extends JDialog {
 	}
 
 	protected void carregarCadastro(Object value) {
-		CadastroRegistro cadastro = new CadastroRegistro(this, (Integer) value);
+		CadastroParametro cadastro = new CadastroParametro(this, (Integer) value);
 		cadastro.addWindowListener(new WindowListener() {
 			@Override
 			public void windowOpened(WindowEvent e) {
@@ -138,37 +132,27 @@ public class ListagemRegistro extends JDialog {
 	}
 
 	protected void refreshData() {
-		table.setModel(new DefaultTableModel(RegistroService.getAllRegistrosAsArray(),
-				new String[] { "C\u00F3digo", "Funcionario", "Tipo", "Momento" }) {
+		table.setModel(
+				new DefaultTableModel(ParametroService.getAllParametrosAsArray(), new String[] { "Id", "Chave", "Valor" }) {
 
-			private static final long serialVersionUID = 8353999914011601804L;
-			Class<?>[] columnTypes = new Class[] { Integer.class, Funcionario.class, RegistroTipo.class, Date.class };
+					private static final long serialVersionUID = -8218725327938436461L;
+					Class<?>[] columnTypes = new Class[] { Integer.class, ParametroChave.class, String.class };
 
-			public Class<?> getColumnClass(int columnIndex) {
-				return columnTypes[columnIndex];
-			}
+					public Class<?> getColumnClass(int columnIndex) {
+						return columnTypes[columnIndex];
+					}
 
-			boolean[] columnEditables = new boolean[] { false, false, false, false };
+					boolean[] columnEditables = new boolean[] { false, false, false };
 
-			public boolean isCellEditable(int row, int column) {
-				return columnEditables[column];
-			}
-		});
-		table.getColumnModel().getColumn(3).setCellRenderer(new TableCellRenderer() {
-			@Override
-			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-					boolean hasFocus, int row, int column) {
-				JLabel label = new JLabel();
-				SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-				if (value != null) {
-					label.setText(dateFormat.format((Date) value));
-				} else if (value == null) {
-					label.setText("<erro>");
-				}
-				return label;
-			}
-		});
-		table.getColumnModel().getColumn(0).setPreferredWidth(50);
+					public boolean isCellEditable(int row, int column) {
+						return columnEditables[column];
+					}
+				});
+		
+		table.getColumnModel().getColumn(0).setPreferredWidth(10);
+		table.getColumnModel().getColumn(1).setPreferredWidth(160);
+		table.getColumnModel().getColumn(2).setPreferredWidth(30);
+		
 	}
 
 }

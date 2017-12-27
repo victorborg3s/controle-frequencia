@@ -21,6 +21,7 @@
 
 		<mapping class="entity.Funcionario" />
 		<mapping class="entity.Registro" />
+		<mapping class="entity.Parametro" />
 
     </session-factory>
 </hibernate-configuration>

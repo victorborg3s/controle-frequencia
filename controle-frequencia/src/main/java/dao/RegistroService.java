@@ -1,6 +1,7 @@
 package dao;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaQuery;
@@ -9,6 +10,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import entity.Funcionario;
 import entity.Registro;
@@ -123,6 +125,31 @@ public class RegistroService {
 		tr.commit();
 
 		return registro;
+	}
+	
+	public static List<Registro> getRegistrosByFuncionarioAndPeriodo(Funcionario funcionario, Date inicioPeriodo,
+			Date fimPeriodo) {
+		
+		List<Registro> registros = null;
+
+		SessionFactory sessFact = HibernateUtils.getSessionFactory();
+		Session session = sessFact.getCurrentSession();
+		Transaction tr = session.getTransaction();
+		if (tr == null || !tr.isActive()) {
+			tr = session.beginTransaction();
+		}
+
+		@SuppressWarnings("unchecked")
+		Query<Registro> q = (Query<Registro>) session.createNamedQuery(Registro.QUERY_BY_FUNCIONARIO_AND_PERIODO);
+		q.setParameter("funcionario", funcionario);
+		q.setParameter("inicioPeriodo", inicioPeriodo);
+		q.setParameter("fimPeriodo", fimPeriodo);
+
+		registros = q.list();
+		
+		tr.commit();
+
+		return registros;
 	}
 	
 }

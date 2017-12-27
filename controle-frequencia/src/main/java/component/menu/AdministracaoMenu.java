@@ -8,7 +8,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import component.funcionario.ListagemFuncionario;
+import component.parametro.ListagemParametro;
 import component.registro.ListagemRegistro;
+import component.report.registro.ReportRegistro;
 
 public class AdministracaoMenu extends JMenu {
 
@@ -28,6 +30,14 @@ public class AdministracaoMenu extends JMenu {
 		JMenuItem admAjusteRegistro = new JMenuItem("Ajuste de Registro");
 		JMenuItem relFrequencia = new JMenuItem("Relatório de Frequência");
 		
+		sysParam.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ListagemParametro dialog = new ListagemParametro(mainFrame);
+				dialog.setVisible(true);
+			}
+		});
+		
 		crudFuncionario.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -40,6 +50,14 @@ public class AdministracaoMenu extends JMenu {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				ListagemRegistro dialog = new ListagemRegistro(mainFrame);
+				dialog.setVisible(true);
+			}
+		});
+		
+		relFrequencia.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ReportRegistro dialog = new ReportRegistro(mainFrame);
 				dialog.setVisible(true);
 			}
 		});

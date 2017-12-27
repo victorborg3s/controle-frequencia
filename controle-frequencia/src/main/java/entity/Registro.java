@@ -1,6 +1,7 @@
 package entity;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -12,11 +13,19 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NamedQueries;
+import org.hibernate.annotations.NamedQuery;
+
 @Entity
 @Table(name = "registro")
+@NamedQueries({
+		@NamedQuery(name = "RegistrosByFuncionarioAndPeriodo", query = "SELECT r FROM Registro r JOIN r.funcionario as f WHERE r.funcionario = :funcionario AND r.momento BETWEEN :inicioPeriodo and :fimPeriodo ORDER BY r.momento ") })
 public class Registro extends BaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 7309109087193111409L;
+	private SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy");
+
+	public static final String QUERY_BY_FUNCIONARIO_AND_PERIODO = "RegistrosByFuncionarioAndPeriodo";
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,4 +74,8 @@ public class Registro extends BaseEntity implements Serializable {
 		this.momento = momento;
 	}
 
+	public String getMomentoFormatedDia() {
+		return fmt.format(getMomento());
+	}
+	
 }

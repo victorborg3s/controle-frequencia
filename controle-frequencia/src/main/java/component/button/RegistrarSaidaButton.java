@@ -44,7 +44,7 @@ public class RegistrarSaidaButton extends JButton {
 	    this.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				RegistroPonto telaRegistro = new RegistroPonto((MainWindowFrame)self.getParent().getParent().getParent().getParent(), RegistroTipo.ENTRADA);
+				RegistroPonto telaRegistro = new RegistroPonto((MainWindowFrame)self.getParent().getParent().getParent().getParent(), RegistroTipo.SAIDA);
 				telaRegistro.setVisible(true);
 			}
 		});
