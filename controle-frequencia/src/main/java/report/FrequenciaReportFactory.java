@@ -1,5 +1,6 @@
 package report;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,13 +23,10 @@ import net.sf.jasperreports.view.JasperViewer;
 
 public class FrequenciaReportFactory {
 
-	private String path;
-	private String pathToReportPackage;
+	private InputStream reportStream;
 
 	public FrequenciaReportFactory() {
-		this.path = this.getClass().getClassLoader().getResource("").getPath();
-		this.pathToReportPackage = this.path + "report/";
-		System.out.println(path);
+		this.reportStream = this.getClass().getResourceAsStream("/report/registros_por_funcionario_periodo.jrxml");
 	}
 
 	public void imprimir(Funcionario funcionario, Date inicio, Date fim) throws Exception {
@@ -51,7 +49,7 @@ public class FrequenciaReportFactory {
 		List<RegistroDia> dias = processarParaRelatorio(funcionario, inicio, cal.getTime());
 
 		JasperReport report = JasperCompileManager
-				.compileReport(this.pathToReportPackage + "registros_por_funcionario_periodo.jrxml");
+				.compileReport(this.reportStream);
 		JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dias);
 
 		JasperPrint print = JasperFillManager.fillReport(report, params, dataSource);
