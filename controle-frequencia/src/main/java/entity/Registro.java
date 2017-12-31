@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
@@ -23,8 +24,13 @@ import org.hibernate.annotations.NamedQuery;
 public class Registro extends BaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 7309109087193111409L;
-	private SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy");
+	@Transient private SimpleDateFormat fmtData, fmtHora = null;
 
+	public Registro() {
+		this.fmtData = new SimpleDateFormat("dd/MM/yyyy");
+		this.fmtHora = new SimpleDateFormat("HH:mm:ss");
+	}
+	
 	public static final String QUERY_BY_FUNCIONARIO_AND_PERIODO = "RegistrosByFuncionarioAndPeriodo";
 
 	@Id
@@ -75,7 +81,25 @@ public class Registro extends BaseEntity implements Serializable {
 	}
 
 	public String getMomentoFormatedDia() {
-		return fmt.format(getMomento());
+		if (momento == null) {
+			return "";
+		} else {
+			if (fmtData == null) {
+				fmtData = new SimpleDateFormat("dd/MM/yyyy");
+			}
+			return fmtData.format(momento);
+		}
+	}
+	
+	public String getMomentoFormatedHora() {
+		if (momento == null) {
+			return "";
+		} else {
+			if (fmtHora == null) {
+				fmtHora = new SimpleDateFormat("HH:mm:ss");
+			}
+			return fmtHora.format(momento);
+		}
 	}
 	
 }

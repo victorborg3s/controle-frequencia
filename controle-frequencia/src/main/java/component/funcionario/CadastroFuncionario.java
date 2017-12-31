@@ -118,4 +118,6 @@ public class CadastroFuncionario extends JDialog {
 		}
 	}
 
+	// TODO: Cadastro da digital
+	
 }

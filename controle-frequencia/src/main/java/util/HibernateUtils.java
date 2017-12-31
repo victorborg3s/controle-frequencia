@@ -9,7 +9,10 @@ public class HibernateUtils {
 
 	static {
 		try {
-			sessionFactory = new Configuration().configure().buildSessionFactory();
+			sessionFactory = new Configuration()
+					.configure()
+					.setProperty("hibernate.connection.url", "jdbc:derby:C:/controle_frequencia/derby")
+					.buildSessionFactory();
 		} catch (Throwable th) {
 
 			System.err.println("Initial SessionFactory creation failed " + th);

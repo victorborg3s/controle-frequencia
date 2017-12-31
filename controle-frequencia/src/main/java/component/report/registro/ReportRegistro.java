@@ -14,9 +14,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.text.MaskFormatter;
 
 import dao.FuncionarioService;
-import dao.RegistroService;
 import entity.Funcionario;
-import entity.Registro;
 
 import javax.swing.JLabel;
 
@@ -26,7 +24,6 @@ import report.FrequenciaReportFactory;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
@@ -45,7 +42,7 @@ public class ReportRegistro extends JDialog {
 	 * Create the dialog.
 	 */
 	public ReportRegistro(JFrame mainFrame) {
-		super(mainFrame, "Relatório de Registros por Funcionário", true);
+		super(mainFrame, "Relatório de Registros por Funcionário", false);
 		self = this;
 		dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		dateFormat.setLenient(false);
@@ -141,18 +138,11 @@ public class ReportRegistro extends JDialog {
 	}
 
 	protected void imprimir() {
-		List<Registro> registros = null;
-		try {
-			registros = RegistroService.getRegistrosByFuncionarioAndPeriodo(
-					(Funcionario)funcionarioComboBox.getSelectedItem(), 
-					dateFormat.parse(inicioTextField.getText()),
-					dateFormat.parse(fimTextField.getText()));
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
 		FrequenciaReportFactory report = new FrequenciaReportFactory();
 		try {
-			report.imprimir(registros);
+			report.imprimir((Funcionario)funcionarioComboBox.getSelectedItem(), 
+					dateFormat.parse(inicioTextField.getText()),
+					dateFormat.parse(fimTextField.getText()));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

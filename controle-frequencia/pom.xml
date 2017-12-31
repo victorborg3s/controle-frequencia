@@ -51,14 +51,20 @@
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.9.3</version>
 		</dependency>
-		
-		<!-- https://mvnrepository.com/artifact/jasperreports/jasperreports -->
+
+		<!-- https://mvnrepository.com/artifact/net.sf.jasperreports/jasperreports -->
 		<dependency>
-		    <groupId>jasperreports</groupId>
-		    <artifactId>jasperreports</artifactId>
-		    <version>3.5.3</version>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.5.0</version>
 		</dependency>
-		
+
+		<!-- https://mvnrepository.com/artifact/com.machinezoo.sourceafis/sourceafis -->
+		<dependency>
+			<groupId>com.machinezoo.sourceafis</groupId>
+			<artifactId>sourceafis</artifactId>
+			<version>2.2.0</version>
+		</dependency>
 
 	</dependencies>
 

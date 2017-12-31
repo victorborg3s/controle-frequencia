@@ -8,8 +8,13 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+import com.machinezoo.sourceafis.FingerprintMatcher;
+import com.machinezoo.sourceafis.FingerprintTemplate;
 
 import entity.Funcionario;
+import entity.FuncionarioImpressaoDigital;
 import util.HibernateUtils;
 
 public class FuncionarioService {
@@ -123,6 +128,49 @@ public class FuncionarioService {
 		session.save(funcionario);
 
 		tr.commit();
+	}
+
+	private static Funcionario getFuncionarioByDigital(FuncionarioImpressaoDigital match) {
+		List<Funcionario> funcionarios = null;
+
+		SessionFactory sessFact = HibernateUtils.getSessionFactory();
+		Session session = sessFact.getCurrentSession();
+		Transaction tr = session.getTransaction();
+		if (tr == null || !tr.isActive()) {
+			tr = session.beginTransaction();
+		}
+
+		@SuppressWarnings("unchecked")
+		Query<Funcionario> q = (Query<Funcionario>) session.createNamedQuery(Funcionario.QUERY_BY_DIGITAL);
+		q.setParameter("digital", match);
+
+		funcionarios = q.list();
+		
+		tr.commit();
+
+		return funcionarios.get(0);
+	}
+	
+	public Funcionario getByFingerprint(byte[] candidate) {
+		FingerprintMatcher matcher = new FingerprintMatcher(new FingerprintTemplate(candidate));
+		List<FuncionarioImpressaoDigital> digitais = FuncionarioImpressaoDigitalService.getAllFuncionarioImpressaoDigital();
+		FuncionarioImpressaoDigital match = null;
+		double higher = 0;
+	    double threshold = 40;
+		
+	    for (FuncionarioImpressaoDigital digital : digitais) {
+	        double score = matcher.match(digital.getFingerprintTemplate());
+	        if (score > higher) {
+	            higher = score;
+	            match = digital;
+	        }
+	    }
+	    
+	    if (higher >= threshold) {
+	    	return FuncionarioService.getFuncionarioByDigital(match);
+	    } else {
+	    	return null;
+	    }
 	}
 
 }
