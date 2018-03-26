@@ -74,7 +74,11 @@ public class RegistroPonto extends JDialog {
 			txtCodigo.addFocusListener(new FocusAdapter() {
 				@Override
 				public void focusLost(FocusEvent e) {
-					self.funcionario = FuncionarioService.getFuncionarioById(Integer.parseInt(txtCodigo.getText()));
+					try {
+						self.funcionario = FuncionarioService.getFuncionarioById(Integer.parseInt(txtCodigo.getText()));
+					} catch (java.lang.NumberFormatException ex) {
+						self.funcionario = null;
+					}
 					if (self.funcionario != null) {
 						lblFuncionarioValue.setText(self.funcionario.getNome());
 					} else {

@@ -96,8 +96,11 @@ public class FuncionarioService {
 		if (tr == null || !tr.isActive()) {
 			tr = session.beginTransaction();
 		}
+		
+		Query<Funcionario> q = session.createQuery("SELECT f FROM Funcionario f LEFT JOIN FETCH f.digital d WHERE f.id = :id", Funcionario.class);
+		q.setParameter("id", id);
 
-		funcionario = session.get(Funcionario.class, id);
+		funcionario = (Funcionario) q.getSingleResult();
 
 		tr.commit();
 

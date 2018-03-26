@@ -33,5 +33,9 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="Digital-Persona-SDK/Java/dpfpenrollment.jar"/>
+	<classpathentry kind="lib" path="Digital-Persona-SDK/Java/dpfpverification.jar"/>
+	<classpathentry kind="lib" path="Digital-Persona-SDK/Java/dpotapi.jar"/>
+	<classpathentry kind="lib" path="Digital-Persona-SDK/Java/dpotjni.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
